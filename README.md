@@ -1,10 +1,13 @@
 # Job Scraper Project
 
 ## * Description
-This project is a simple web scraper built using Python.  
-It extracts job listings from a careers webpage and saves the data into an Excel file.
+This project is a Python-based web scraper that extracts job listings from a careers webpage and stores the data in a structured Excel file.
 
----
+## * Features
+- Scrapes job title, location, and job links
+- Generates experience, skills, and job descriptions
+- Saves data into a well-formatted Excel file
+- Automatically adjusts column width and formatting
 
 ## * Technologies Used
 - Python
@@ -13,36 +16,26 @@ It extracts job listings from a careers webpage and saves the data into an Excel
 - pandas
 - openpyxl
 
----
+## * How It Works
+1. Sends an HTTP request to the website  
+2. Parses HTML content using BeautifulSoup  
+3. Extracts job details  
+4. Generates additional fields (experience, skills, description)  
+5. Stores data in a structured format  
+6. Exports data to an Excel file  
 
-## * How it works
-1. Sends a request to the website
-2. Parses HTML content
-3. Extracts job title, company, and location
-4. Stores data in a table
-5. Saves it as an Excel file (jobs.xlsx)
+## *  How to Run
+1. Install required libraries:pip install requests beautifulsoup4 pandas openpyxl
+2. Run the script:python scraper.py
 
----
-
-## * How to run
-1. Install required libraries:
- pip install requests beautifulsoup4 pandas openpyxl
- 
-2. Run the script:
- python scraper.py
-
----
 
 ## * Output
 The program generates:
-- jobs.xlsx → contains job data
 
----
+- `Final_Jobs.xlsx` → Contains structured and formatted job data
 
 ## * Source Website
 https://realpython.github.io/fake-jobs/
 
----
-
 ## * Author
- Vaishnavi PV
+Vaishnavi PV

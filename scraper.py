@@ -3,20 +3,18 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment
-from urllib.parse import urljoin
 import os
 
 print("🚀 Script started...")
 
-# URLs
-base_url = "https://realpython.github.io"
-url = base_url + "/fake-jobs/"
+# Website URL
+url = "https://realpython.github.io/fake-jobs/"
 
 headers = {
     "User-Agent": "Mozilla/5.0"
 }
 
-# Request page
+# Get webpage
 response = requests.get(url, headers=headers)
 soup = BeautifulSoup(response.text, "html.parser")
 
@@ -24,7 +22,8 @@ jobs = soup.find_all("div", class_="card-content")
 
 job_list = []
 
-# -------- Helper Functions -------- #
+
+# Helper Functions
 
 def get_experience(title):
     title = title.lower()
@@ -55,22 +54,30 @@ def get_skills(title):
 
 
 def get_description(title):
-    return f"We are looking for a {title} who can contribute by building scalable solutions, collaborating with teams, and delivering high-quality applications."
+    return f"We are looking for a {title} who can contribute by building scalable solutions and collaborating with teams."
 
 
-# -------- Scraping -------- #
+# Scraping
 
 for job in jobs:
 
     title_tag = job.find("h2", class_="title")
     location_tag = job.find("p", class_="location")
-    link_tag = job.find("a")
 
     title = title_tag.text.strip() if title_tag else "N/A"
     location = location_tag.text.strip() if location_tag else "N/A"
 
-    # Create proper full URL
-    link = urljoin(url, link_tag["href"]) if link_tag else "N/A"
+    # Find Apply link
+    apply_link = "N/A"
+
+    links = job.find_all("a")
+
+    for a in links:
+        href = a.get("href")
+
+        if href and href.startswith("http"):
+            apply_link = href
+            break
 
     experience = get_experience(title)
     skills = get_skills(title)
@@ -83,67 +90,61 @@ for job in jobs:
         "ExperienceRequired": experience,
         "SkillsRequired": skills,
         "Salary": salary,
-        "JobURL": link,
+        "JobURL": apply_link,
         "JobDescriptionSummary": description
     })
 
 
-# -------- Create DataFrame -------- #
+# Create DataFrame
 
 df = pd.DataFrame(job_list)
 
-# -------- Save Excel -------- #
-
 file_name = "Final_Jobs.xlsx"
 
-# Remove old file if exists
+# Delete old file if exists
 if os.path.exists(file_name):
     try:
         os.remove(file_name)
     except:
-        print("⚠️ Please close the Excel file and run again.")
+        print("⚠️ Close the Excel file and run again.")
         exit()
 
 
+# Save Excel
 with pd.ExcelWriter(file_name, engine="openpyxl") as writer:
     df.to_excel(writer, index=False, sheet_name="Jobs")
 
 
-# -------- Format Excel -------- #
-
+# Open workbook
 wb = load_workbook(file_name)
 ws = wb["Jobs"]
 
+
+# Format columns
 for column in ws.columns:
 
     max_length = 0
-    column_letter = column[0].column_letter
+    col_letter = column[0].column_letter
 
     for cell in column:
 
+        cell.alignment = Alignment(wrap_text=True)
+
         if cell.value:
-
-            # Wrap text
-            cell.alignment = Alignment(wrap_text=True)
-
-            # Auto width
             max_length = max(max_length, len(str(cell.value)))
 
-    ws.column_dimensions[column_letter].width = min(max_length + 5, 50)
+    ws.column_dimensions[col_letter].width = min(max_length + 5, 50)
 
 
-# -------- Make JobURL Clickable -------- #
-
-for cell in ws["F"][1:]:      # Column F = JobURL
+# Make JobURL clickable
+for cell in ws["F"][1:]:
 
     if cell.value != "N/A":
         cell.hyperlink = cell.value
         cell.style = "Hyperlink"
 
 
-# Save workbook
 wb.save(file_name)
 
-print("✅ Done!")
-print("📂 Excel file created:", file_name)
+print("✅ Final_Jobs.xlsx created successfully!")
 print("🔗 Job URLs are clickable.")

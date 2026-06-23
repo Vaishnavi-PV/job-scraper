@@ -22,9 +22,6 @@ jobs = soup.find_all("div", class_="card-content")
 
 job_list = []
 
-
-# ---------- Helper Functions ----------
-
 def get_experience(title):
     title = title.lower()
 
@@ -57,8 +54,6 @@ def get_description(title):
     return f"We are looking for a {title} who can contribute by building scalable solutions, collaborating with teams, and delivering high-quality applications."
 
 
-# ---------- Scraping ----------
-
 for job in jobs:
 
     title_tag = job.find("h2", class_="title")
@@ -90,9 +85,6 @@ for job in jobs:
         "JobDescriptionSummary": description
     })
 
-
-# ---------- DataFrame ----------
-
 df = pd.DataFrame(job_list)
 
 file_name = "Final_Jobs.xlsx"
@@ -106,13 +98,9 @@ if os.path.exists(file_name):
         exit()
 
 
-# ---------- Save Excel ----------
-
 with pd.ExcelWriter(file_name, engine="openpyxl") as writer:
     df.to_excel(writer, index=False, sheet_name="Jobs")
 
-
-# ---------- Format Excel ----------
 
 wb = load_workbook(file_name)
 ws = wb["Jobs"]
@@ -131,8 +119,6 @@ for column in ws.columns:
 
     ws.column_dimensions[col_letter].width = min(max_length + 5, 50)
 
-
-# ---------- Make JobURL clickable ----------
 
 for cell in ws["F"][1:]:
 

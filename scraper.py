@@ -23,7 +23,7 @@ jobs = soup.find_all("div", class_="card-content")
 job_list = []
 
 
-# Helper Functions
+# ---------- Helper Functions ----------
 
 def get_experience(title):
     title = title.lower()
@@ -54,10 +54,10 @@ def get_skills(title):
 
 
 def get_description(title):
-    return f"We are looking for a {title} who can contribute by building scalable solutions and collaborating with teams."
+    return f"We are looking for a {title} who can contribute by building scalable solutions, collaborating with teams, and delivering high-quality applications."
 
 
-# Scraping
+# ---------- Scraping ----------
 
 for job in jobs:
 
@@ -67,17 +67,13 @@ for job in jobs:
     title = title_tag.text.strip() if title_tag else "N/A"
     location = location_tag.text.strip() if location_tag else "N/A"
 
-    # Find Apply link
-    apply_link = "N/A"
+    # Get first hyperlink exactly as it is
+    link_tag = job.find("a")
 
-    links = job.find_all("a")
-
-    for a in links:
-        href = a.get("href")
-
-        if href and href.startswith("http"):
-            apply_link = href
-            break
+    if link_tag and link_tag.get("href"):
+        link = link_tag.get("href")
+    else:
+        link = "N/A"
 
     experience = get_experience(title)
     skills = get_skills(title)
@@ -90,12 +86,12 @@ for job in jobs:
         "ExperienceRequired": experience,
         "SkillsRequired": skills,
         "Salary": salary,
-        "JobURL": apply_link,
+        "JobURL": link,
         "JobDescriptionSummary": description
     })
 
 
-# Create DataFrame
+# ---------- DataFrame ----------
 
 df = pd.DataFrame(job_list)
 
@@ -106,21 +102,21 @@ if os.path.exists(file_name):
     try:
         os.remove(file_name)
     except:
-        print("⚠️ Close the Excel file and run again.")
+        print("⚠️ Close Excel and run again.")
         exit()
 
 
-# Save Excel
+# ---------- Save Excel ----------
+
 with pd.ExcelWriter(file_name, engine="openpyxl") as writer:
     df.to_excel(writer, index=False, sheet_name="Jobs")
 
 
-# Open workbook
+# ---------- Format Excel ----------
+
 wb = load_workbook(file_name)
 ws = wb["Jobs"]
 
-
-# Format columns
 for column in ws.columns:
 
     max_length = 0
@@ -136,7 +132,8 @@ for column in ws.columns:
     ws.column_dimensions[col_letter].width = min(max_length + 5, 50)
 
 
-# Make JobURL clickable
+# ---------- Make JobURL clickable ----------
+
 for cell in ws["F"][1:]:
 
     if cell.value != "N/A":
